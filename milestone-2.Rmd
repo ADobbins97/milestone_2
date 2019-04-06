@@ -1,0 +1,57 @@
+---
+title: "Milestone 2"
+author: "Alexandra Dobbins"
+date: "4/5/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(tidyverse)
+library(readxl)
+library(janitor)
+
+```
+
+
+```{r, message = FALSE}
+data <- read_xlsx("Artemis_gov_1005.xlsx")
+data <- data %>% clean_names()
+
+unique_customers <- 
+  data %>% 
+  select(email) %>% 
+  filter(!is.na(email)) %>% 
+  group_by(email) %>% 
+  summarise(n_distinct(email)) %>% 
+  nrow()
+
+unique_products <- 
+  data %>% 
+  select(lineitem_sku) %>% 
+  filter(!is.na(lineitem_sku)) %>% 
+  group_by(lineitem_sku) %>% 
+  summarise(n_distinct(lineitem_sku)) %>% 
+  nrow()
+
+data$Date <- format(as.POSIXct(data$paid_at,format="%Y-%m-%d %H:%M:%S"),"%Y-%m-%d")
+data$Year <- format(as.POSIXct(data$paid_at,format="%Y-%m-%d %H:%M:%S"),"%Y")
+
+daily_avg_2018 <-
+  data %>%
+  select(Date, Year) %>%
+  filter(Year == "2018") %>% 
+  filter(!is.na(Date), !is.na(Year)) %>% 
+  group_by(Date) %>% 
+  summarize(total = n()) %>% 
+  summarize(avg = mean(total)) %>% 
+  round(digits = 1)
+  
+```
+ 
+ - `r unique_customers` different people have bought a product from the store. 
+ - `r unique_products` different types styles/products have been sold by the company.  
+- An average of `r daily_avg_2018` products were sold per day in 2018.
+ 
+ 
