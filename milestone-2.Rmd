@@ -11,8 +11,17 @@ knitr::opts_chunk$set(echo = FALSE)
 library(tidyverse)
 library(readxl)
 library(janitor)
+library(ggplot2)
 
 ```
+
+
+**What is this data?**
+
+This dataset is all the sales that a small business based in Boston has made since their beginning in 2014. The data includes, an ID number, email, date, details and quantity of items sold, address, and some survey questions such as "How did you hear about us?"
+
+I got this data when I interned with the company last academic year, and have continues to do annual sales reports since. Through this, I have explored the data thoroughly and am very familiar with it and what the SKUs mean, the styles and subtle differences between products, and how the documentation of the same item has changed over time. I have analyzed sales by month, sales by item, both, holiday season fluctuation, by color, by region, by money spent. But never in a streamlined and elegant manner, or with a tool/knowledge strong enough to explore the intricate features of this dataset. 
+
 
 
 ```{r, message = FALSE}
@@ -35,23 +44,30 @@ unique_products <-
   summarise(n_distinct(lineitem_sku)) %>% 
   nrow()
 
-data$Date <- format(as.POSIXct(data$paid_at,format="%Y-%m-%d %H:%M:%S"),"%Y-%m-%d")
-data$Year <- format(as.POSIXct(data$paid_at,format="%Y-%m-%d %H:%M:%S"),"%Y")
-
-daily_avg_2018 <-
-  data %>%
-  select(Date, Year) %>%
-  filter(Year == "2018") %>% 
-  filter(!is.na(Date), !is.na(Year)) %>% 
-  group_by(Date) %>% 
-  summarize(total = n()) %>% 
-  summarize(avg = mean(total)) %>% 
-  round(digits = 1)
+#data$Date <- format(as.POSIXct(data$paid_at,format="%Y-%m-%d %H:%M:%S"),"%Y-%m-%d")
+#data$Year <- format(as.POSIXct(data$paid_at,format="%Y-%m-%d %H:%M:%S"),"%Y")
   
 ```
  
  - `r unique_customers` different people have bought a product from the store. 
  - `r unique_products` different types styles/products have been sold by the company.  
-- An average of `r daily_avg_2018` products were sold per day in 2018.
+
+
+```{r}
+
+ggplot_m2 <- 
+  data %>% 
+  select(billing_province) %>% 
+  filter(billing_province %in% c("MA", "NH", "VT", "NH", "ME", "CT")) %>% 
+  group_by(billing_province) %>%  
+  ggplot(aes(x = billing_province)) +
+  geom_bar(width = 0.5) +
+  xlab("State") +
+  ylab("Number of Sales") +
+  labs(title = "Number of Sales in Each New England State") 
+  
+ggplot_m2
+
+```
  
  
